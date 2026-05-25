@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Aviator Lite - Demo Wallet</title>
+    <title>Aviator - Game Room</title>
     <style>
-        body { background-color: #0f0f12; color: white; font-family: Arial, sans-serif; text-align: center; }
+        body { background-color: #0f0f12; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; }
         .header-bar { display: flex; justify-content: space-between; padding: 15px 30px; background: #14151a; border-bottom: 1px solid #272a33; }
         .balance-box { background: #28a745; padding: 5px 15px; border-radius: 5px; font-weight: bold; }
-        #game-area { width: 100%; max-width: 600px; height: 300px; background-color: #14151a; margin: 20px auto; border-radius: 15px; position: relative; overflow: hidden; border: 2px solid #272a33; }
+        #game-area { width: 90%; max-width: 600px; height: 300px; background-color: #14151a; margin: 20px auto; border-radius: 15px; position: relative; overflow: hidden; border: 2px solid #272a33; }
         #plane { width: 50px; height: 40px; position: absolute; bottom: 20px; left: 20px; font-size: 40px; }
         #multiplier { font-size: 4rem; font-weight: bold; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); }
         button { padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 600px; }
@@ -18,24 +18,22 @@
 <body>
 
     <div class="header-bar">
-        <div>Welcome, <strong>{{ username }}</strong>! (<a href="/logout" style="color: #aaa;">Logout</a>)</div>
+        <div>Player: <strong>{{ username }}</strong> | <a href="/logout" style="color: #aaa;">Logout</a></div>
         <div class="balance-box">Demo Balance: <span id="user-balance">{{ balance }}</span> TK</div>
     </div>
-
-    <h2 style="color: #e91e63; margin-top: 20px;">AVIATOR DEMO SYSTEM</h2>
     
     <div id="game-area">
         <div id="multiplier">1.00x</div>
         <div id="plane">✈️</div>
     </div>
 
-    <div style="margin-top: 10px; padding: 0 20px;">
-        <input type="number" id="bet-amount" value="100" min="10" style="padding: 10px; width: 100%; max-width: 580px; margin-bottom: 10px; background: #1c1d24; color: white; border: 1px solid #444; border-radius: 5px; text-align: center;" placeholder="Enter Bet Amount"><br>
+    <div style="padding: 0 20px;">
+        <input type="number" id="bet-amount" value="100" min="10" style="padding: 10px; width: 100%; max-width: 580px; margin-bottom: 10px; background: #1c1d24; color: white; border: 1px solid #444; border-radius: 5px; text-align: center;"><br>
         <button id="bet-btn" onclick="startGame()">PLACE BET</button>
         <button id="cashout-btn" onclick="cashOut()">CASH OUT</button>
     </div>
     
-    <div id="status" style="margin-top: 20px; font-weight: bold; color: #aaa;">Place a bet to start.</div>
+    <div id="status" style="margin-top: 20px; font-weight: bold; color: #aaa;">Place a bet to fly!</div>
 
     <script>
         let currentMultiplier = 1.00;
@@ -54,9 +52,9 @@
                 return;
             }
 
-            // ডেমো ব্যালেন্স থেকে বেটের টাকা মাইনাস করা
             document.getElementById("user-balance").innerText = (currentBalance - betAmount).toFixed(2);
-            document.getElementById("status").innerText = "Taking off...";
+            document.getElementById("status").innerText = "The Plane is flying...";
+            document.getElementById("multiplier").innerText = "1.00x";
             
             const response = await fetch('/start-game', { method: 'POST' });
             const data = await response.json();
@@ -88,7 +86,6 @@
             let currentBalance = parseFloat(document.getElementById("user-balance").innerText);
             let winnings = betAmount * currentMultiplier;
             
-            // ডেমো ব্যালেন্সের সাথে জয়ী টাকা যোগ করা
             document.getElementById("user-balance").innerText = (currentBalance + winnings).toFixed(2);
             document.getElementById("status").innerText = `🎉 Won! +${winnings.toFixed(2)} TK`;
             
