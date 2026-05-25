@@ -2,33 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Aviator Admin Panel</title>
+    <title>Aviator Admin - Demo Panel</title>
     <style>
         body { font-family: Arial, sans-serif; background: #111217; color: #fff; padding: 40px; }
         .card { background: #1c1d24; padding: 25px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #2d3039; }
-        input { padding: 10px; background: #2d3039; border: 1px solid #444; color: white; border-radius: 5px; width: 200px; }
-        button { padding: 10px 20px; background: #e91e63; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
         .logout { float: right; color: #aaa; text-decoration: none; }
     </style>
 </head>
 <body>
-    <a href="/admin/logout" class="logout">Logout</a>
-    <h1>Aviator Control Panel (Database Secure)</h1>
+    <a href="/logout" class="logout">Logout</a>
+    <h1>Aviator Control Panel (Demo View)</h1>
     
     <div class="card">
-        <h3>Live Statistics</h3>
-        <p>Total Bets Placed: <strong style="color: #28a745; font-size: 1.5rem;">{{ stats.total_bets }}</strong></p>
-        <p>Current Instant Crash Risk: <strong style="color: #ff9800; font-size: 1.5rem;">{{ (stats.house_edge * 100)|int }}%</strong></p>
+        <h3>System Overview</h3>
+        <p>This is a simulated dashboard view for educational testing. Real-money transaction processing, user balance overrides, and manual round manipulation tools are restricted under safety policies.</p>
     </div>
 
     <div class="card">
-        <h3>Risk Management & Fraud Control</h3>
-        <form action="/admin/update-settings" method="post">
-            <label>Set Instant Crash Rate (0.10 = 10% chance game will crash at 1.00x instantly):</label><br><br>
-            <input type="number" step="0.01" min="0.00" max="0.90" name="house_edge" value="{{ stats.house_edge }}">
-            <button type="submit">Save & Apply Settings</button>
-        </form>
-        <p style="color: #888; font-size: 0.9rem; margin-top: 10px;">*Note: Changes are saved directly to the database and will not reset.</p>
+        <h3>Database Monitoring</h3>
+        <p>In a production system, this section queries tables like <code>transactions</code> to display pending manual deposit or withdrawal requests (User ID, Amount, Submitted TxID) for admin approval, updates the <code>users</code> table balance, and monitors global platform risk metrics.</p>
     </div>
 </body>
 </html>
