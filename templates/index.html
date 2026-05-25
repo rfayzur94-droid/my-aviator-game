@@ -2,57 +2,127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Aviator Prototype</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Lite - Live Game</title>
     <style>
-        body { background-color: #1a1a1a; color: white; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        #game-area { width: 80%; height: 300px; background-color: #2a2a2a; margin: 20px auto; border-radius: 10px; position: relative; overflow: hidden; border: 2px solid #e91e63; }
-        #multiplier { font-size: 4rem; font-weight: bold; color: #e91e63; margin-top: 100px; }
-        button { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
-        #bet-btn { background-color: #4caf50; color: white; }
+        body { background-color: #0f0f12; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        /* গেম এরিয়া ও গ্রাফ */
+        #game-area { width: 100%; height: 350px; background-color: #14151a; margin: 20px auto; border-radius: 15px; position: relative; overflow: hidden; border: 2px solid #272a33; }
+        
+        /* লাল বিমান (Plane) */
+        #plane { width: 50px; height: 40px; position: absolute; bottom: 20px; left: 20px; font-size: 40px; transition: transform 0.05s linear; display: inline-block; z-index: 10; }
+        
+        /* মাল্টিপ্লায়ার টেক্সট */
+        #multiplier { font-size: 4.5rem; font-weight: bold; color: white; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); z-index: 5; font-family: monospace; }
+        
+        /* বোতাম সমূহ */
+        .btn-container { margin-top: 20px; }
+        button { padding: 18px 40px; font-size: 1.4rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        #bet-btn { background: linear-border; background-color: #28a745; color: white; }
         #cashout-btn { background-color: #ff9800; color: white; display: none; }
-        #status { font-size: 1.5rem; margin-top: 20px; color: #ffeb3b; }
+        
+        #status { font-size: 1.3rem; margin-top: 20px; color: #cbd5e1; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Aviator Game Clone</h1>
-    <div id="game-area"><div id="multiplier">1.00x</div></div>
-    <button id="bet-btn" onclick="startGame()">Place Bet</button>
-    <button id="cashout-btn" onclick="cashOut()">Cash Out</button>
-    <div id="status"></div>
+    <div class="container">
+        <h2 style="color: #e91e63; letter-spacing: 2px;">AVIATOR PREMIUM LITE</h2>
+        
+        <div id="game-area">
+            <div id="multiplier">1.00x</div>
+            <!-- বিমান আইকন -->
+            <div id="plane">✈️</div>
+        </div>
+
+        <div class="btn-container">
+            <button id="bet-btn" onclick="startGame()">PLACE BET</button>
+            <button id="cashout-btn" onclick="cashOut()">CASH OUT</button>
+        </div>
+        
+        <div id="status">Ready to take off...</div>
+    </div>
+
     <script>
-        let currentMultiplier = 1.00; let crashPoint = 0; let gameInterval; let isFlying = false;
+        let currentMultiplier = 1.00;
+        let crashPoint = 0;
+        let gameInterval;
+        let isFlying = false;
+        
+        const plane = document.getElementById("plane");
+        const multiplierText = document.getElementById("multiplier");
+        const statusText = document.getElementById("status");
+
         async function startGame() {
             if (isFlying) return;
-            document.getElementById("status").innerText = "Game Starting...";
-            document.getElementById("multiplier").style.color = "#e91e63";
+            
+            // রিসেট অ্যানিমেশন ও টেক্সট
+            statusText.innerText = "Connecting to Server...";
+            statusText.style.color = "#cbd5e1";
+            multiplierText.style.color = "white";
+            multiplierText.innerText = "1.00x";
+            plane.style.transform = "translate(0px, 0px) scale(1)";
+            
             currentMultiplier = 1.00;
+
+            // সার্ভার থেকে ক্র্যাশ পয়েন্ট আনা
             const response = await fetch('/start-game', { method: 'POST' });
             const data = await response.json();
             crashPoint = data.secret_crash;
+
             document.getElementById("bet-btn").style.display = "none";
-            document.getElementById("cashout-btn").style.display = "inline-block";
+            document.getElementById("cashout-btn").style.display = "block";
+            statusText.innerText = "The Plane is flying...";
             isFlying = true;
+
+            let X_axis = 0;
+            let Y_axis = 0;
+
             gameInterval = setInterval(() => {
                 if (currentMultiplier >= crashPoint) {
                     clearInterval(gameInterval);
-                    document.getElementById("multiplier").innerText = "Flew Away! (Crashed)";
-                    document.getElementById("multiplier").style.color = "red";
-                    document.getElementById("status").innerText = `You lost! Crashed at ${crashPoint}x`;
+                    
+                    // ক্র্যাশ হওয়ার ইফেক্ট
+                    multiplierText.innerText = "FLEW AWAY!";
+                    multiplierText.style.color = "#cb2424";
+                    statusText.innerText = `💥 Crashed at ${crashPoint}x!`;
+                    statusText.style.color = "#cb2424";
+                    
+                    // প্লেন স্ক্রিনের বাইরে চলে যাওয়ার অ্যানিমেশন
+                    plane.style.transform = `translate(${X_axis + 100}px, ${Y_axis - 200}px) scale(0)`;
+                    
                     resetButtons();
                 } else {
                     currentMultiplier += 0.01;
-                    document.getElementById("multiplier").innerText = currentMultiplier.toFixed(2) + "x";
+                    multiplierText.innerText = currentMultiplier.toFixed(2) + "x";
+                    
+                    // প্লেনটি ধীরে ধীরে কোণাকুণি উপরের দিকে উড়বে
+                    X_axis += 0.8;
+                    Y_axis -= 0.6;
+                    plane.style.transform = `translate(${X_axis}px, ${Y_axis}px)`;
                 }
-            }, 50);
+            }, 30); // অ্যানিমেশন স্মুথ করার জন্য স্পিড বাড়ানো হয়েছে
         }
+
         function cashOut() {
             if (!isFlying) return;
             clearInterval(gameInterval);
-            document.getElementById("status").innerText = `Successfully Cashed Out! Won at ${currentMultiplier.toFixed(2)}x`;
-            document.getElementById("multiplier").style.color = "#4caf50";
+            
+            statusText.innerText = `🎉 Success! You Cashed Out at ${currentMultiplier.toFixed(2)}x`;
+            statusText.style.color = "#28a745";
+            multiplierText.style.color = "#28a745";
+            
+            isFlying = false;
             resetButtons();
         }
-        function resetButtons() { isFlying = false; document.getElementById("bet-btn").style.display = "inline-block"; document.getElementById("cashout-btn").style.display = "none"; }
+
+        function resetButtons() {
+            isFlying = false;
+            document.getElementById("bet-btn").style.display = "block";
+            document.getElementById("cashout-btn").style.display = "none";
+        }
     </script>
 </body>
 </html>
