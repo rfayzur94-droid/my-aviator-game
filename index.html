@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aviator Prototype</title>
+    <style>
+        body { background-color: #1a1a1a; color: white; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        #game-area { width: 80%; height: 300px; background-color: #2a2a2a; margin: 20px auto; border-radius: 10px; position: relative; overflow: hidden; border: 2px solid #e91e63; }
+        #multiplier { font-size: 4rem; font-weight: bold; color: #e91e63; margin-top: 100px; }
+        button { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+        #bet-btn { background-color: #4caf50; color: white; }
+        #cashout-btn { background-color: #ff9800; color: white; display: none; }
+        #status { font-size: 1.5rem; margin-top: 20px; color: #ffeb3b; }
+    </style>
+</head>
+<body>
+    <h1>Aviator Game Clone</h1>
+    <div id="game-area"><div id="multiplier">1.00x</div></div>
+    <button id="bet-btn" onclick="startGame()">Place Bet</button>
+    <button id="cashout-btn" onclick="cashOut()">Cash Out</button>
+    <div id="status"></div>
+    <script>
+        let currentMultiplier = 1.00; let crashPoint = 0; let gameInterval; let isFlying = false;
+        async function startGame() {
+            if (isFlying) return;
+            document.getElementById("status").innerText = "Game Starting...";
+            document.getElementById("multiplier").style.color = "#e91e63";
+            currentMultiplier = 1.00;
+            const response = await fetch('/start-game', { method: 'POST' });
+            const data = await response.json();
+            crashPoint = data.secret_crash;
+            document.getElementById("bet-btn").style.display = "none";
+            document.getElementById("cashout-btn").style.display = "inline-block";
+            isFlying = true;
+            gameInterval = setInterval(() => {
+                if (currentMultiplier >= crashPoint) {
+                    clearInterval(gameInterval);
+                    document.getElementById("multiplier").innerText = "Flew Away! (Crashed)";
+                    document.getElementById("multiplier").style.color = "red";
+                    document.getElementById("status").innerText = `You lost! Crashed at ${crashPoint}x`;
+                    resetButtons();
+                } else {
+                    currentMultiplier += 0.01;
+                    document.getElementById("multiplier").innerText = currentMultiplier.toFixed(2) + "x";
+                }
+            }, 50);
+        }
+        function cashOut() {
+            if (!isFlying) return;
+            clearInterval(gameInterval);
+            document.getElementById("status").innerText = `Successfully Cashed Out! Won at ${currentMultiplier.toFixed(2)}x`;
+            document.getElementById("multiplier").style.color = "#4caf50";
+            resetButtons();
+        }
+        function resetButtons() { isFlying = false; document.getElementById("bet-btn").style.display = "inline-block"; document.getElementById("cashout-btn").style.display = "none"; }
+    </script>
+</body>
+</html>
