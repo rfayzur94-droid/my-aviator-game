@@ -2,18 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Aviator Admin</title>
+    <title>Admin Dashboard - Live Requests</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #111217; color: #fff; padding: 40px; }
-        .card { background: #1c1d24; padding: 25px; margin-bottom: 20px; border-radius: 12px; }
+        body { font-family: Arial, sans-serif; background: #111217; color: #fff; padding: 30px; }
+        .card { background: #1c1d24; padding: 20px; border-radius: 10px; border: 1px solid #2d3039; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #2d3039; text-align: left; }
+        th { background-color: #14151a; color: #e91e63; }
+        tr:nth-child(even) { background-color: #16171e; }
+        .badge { padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; background: #ff9800; color: black; }
     </style>
 </head>
 <body>
-    <h1>Aviator Admin Dashboard (Demo Mode)</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Aviator System Dashboard</h1>
+        <a href="/logout" style="color: #aaa; text-decoration: none; font-weight: bold;">Logout</a>
+    </div>
+    
     <div class="card">
-        <h3>Live Stats</h3>
-        <p>Total Simulated Bets: <strong>{{ stats.total_bets }}</strong></p>
-        <p>Global House Risk: <strong>{{ (stats.house_edge * 100)|int }}%</strong></p>
+        <h3>Simulated Player Transactions (Manual Mode)</h3>
+        <p style="color: #888; font-size: 0.9rem;">The requests submitted by users via Deposit/Withdrawal forms appear here in real-time:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Player Username</th>
+                    <th>Type</th>
+                    <th>Method</th>
+                    <th>Number</th>
+                    <th>Amount (TK)</th>
+                    <th>Submitted TxID</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in list %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td><strong>{{ row[1] }}</strong></td>
+                    <td style="color: {% if row[2] == 'deposit' %}#28a745{% else %}#cb2424{% endif %}; font-weight:bold;">{{ row[2].upper() }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td><strong>{{ row[5] }}</strong></td>
+                    <td style="font-family: monospace; color: #00bcd4;">{{ row[6] }}</td>
+                    <td><span class="badge">{{ row[7] }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #666;">No transaction requests submitted yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
