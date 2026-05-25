@@ -4,14 +4,23 @@ import sqlite3
 from flask import Flask, jsonify, render_template, request, session, redirect, url_for
 
 app = Flask(__name__)
-app.secret_key = "super_secret_admin_key"
+app.secret_key = "super_secret_key_for_demo"
 
-# ডাটাবেজ সেটআপ (ফ্রি সার্ভারে ডাটা স্থায়ী রাখার জন্য SQLite ব্যবহার করা হয়েছে)
 DB_FILE = "game_data.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+    # ডেমো ইউজার টেবিল
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            balance REAL
+        )
+    ''')
+    # গেম সেটিংস টেবিল
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
@@ -19,18 +28,18 @@ def init_db():
             total_bets INTEGER
         )
     ''')
-    # ডিফল্ট ডাটা যদি না থাকে
+    
+    # ডিফল্ট সেটিংস ইনসার্ট করা
     cursor.execute("SELECT COUNT(*) FROM settings")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("INSERT INTO settings (id, house_edge, total_bets) VALUES (1, 0.10, 0)") # ১০% ডিফল্ট রিস্ক
+        cursor.execute("INSERT INTO settings (id, house_edge, total_bets) VALUES (1, 0.10, 0)")
+        
     conn.commit()
     conn.close()
 
 init_db()
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "securepassword123"
-
+# --- HELPER FUNCTIONS ---
 def get_settings():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -39,73 +48,94 @@ def get_settings():
     conn.close()
     return {"house_edge": row[0], "total_bets": row[1]}
 
-def update_db_settings(house_edge):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("UPDATE settings SET house_edge = ? WHERE id = 1", (house_edge,))
-    conn.commit()
-    conn.close()
-
-def increment_bets():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("UPDATE settings SET total_bets = total_bets + 1 WHERE id = 1")
-    conn.commit()
-    conn.close()
-
-def generate_crash_point(house_edge):
-    if random.random() < house_edge:
-        return 1.00
-    e = random.random()
-    crash_point = 99 / (100 - e * 100)
-    return round(max(1.00, crash_point), 2)
-
 @app.route("/")
 def home():
-    return render_template("index.html")
+    if "user_logged_in" not in session:
+        return redirect(url_for("user_login"))
+    
+    # ইউজারের বর্তমান ডেমো ব্যালেন্স আনা
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT balance FROM users WHERE username = ?", (session["username"],))
+    balance = cursor.fetchone()[0]
+    conn.close()
+    
+    return render_template("index.html", username=session["username"], balance=balance)
 
-@app.route("/start-game", methods=["POST"])
-def start_game():
-    increment_bets()
-    current_settings = get_settings()
-    crash_point = generate_crash_point(current_settings["house_edge"])
-    return jsonify({"status": "flying", "secret_crash": crash_point})
-
-@app.route("/admin/login", methods=["GET", "POST"])
-def admin_login():
+# --- ইউজার সাইনআপ ও লগইন সিস্টেম ---
+@app.route("/register", methods=["GET", "POST"])
+def user_register():
     if request.method == "POST":
-        if request.form["username"] == ADMIN_USERNAME and request.form["password"] == ADMIN_PASSWORD:
-            session["admin_logged_in"] = True
-            return redirect(url_for("admin_dashboard"))
-        return "Invalid Credentials!"
+        username = request.form["username"]
+        password = request.form["password"]
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            # নতুন ইউজারকে টেস্ট করার জন্য ৫০০০ ডেমো কয়েন/টাকা দেওয়া হচ্ছে
+            cursor.execute("INSERT INTO users (username, password, balance) VALUES (?, ?, ?)", (username, password, 5000.0))
+            conn.commit()
+            conn.close()
+            return 'Account Created! <a href="/login">Login here</a>'
+        except:
+            return "Username already exists!"
     return '''
         <form method="post" style="text-align:center; margin-top:100px; font-family:Arial;">
-            <h2>Admin Login</h2>
-            <input type="text" name="username" placeholder="Username" required><br><br>
-            <input type="password" name="password" placeholder="Password" required><br><br>
-            <button type="submit" style="padding:10px 20px; background:#e91e63; color:white; border:none; cursor:pointer;">Login</button>
+            <h2>Player Registration (Demo)</h2>
+            <input type="text" name="username" placeholder="Choose Username" required><br><br>
+            <input type="password" name="password" placeholder="Choose Password" required><br><br>
+            <button type="submit">Sign Up</button>
         </form>
     '''
 
-@app.route("/admin/dashboard")
-def admin_dashboard():
-    if not session.get("admin_logged_in"):
-        return redirect(url_for("admin_login"))
-    current_settings = get_settings()
-    return render_template("admin.html", stats=current_settings)
+@app.route("/login", methods=["GET", "POST"])
+def user_login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row and row[0] == password:
+            session["user_logged_in"] = True
+            session["username"] = username
+            return redirect(url_for("home"))
+        return "Invalid Username or Password!"
+        
+    return '''
+        <form method="post" style="text-align:center; margin-top:100px; font-family:Arial;">
+            <h2>Player Login (Demo)</h2>
+            <input type="text" name="username" placeholder="Username" required><br><br>
+            <input type="password" name="password" placeholder="Password" required><br><br>
+            <button type="submit">Login</button><br><br>
+            <a href="/register">Don't have an account? Register here</a>
+        </form>
+    '''
 
-@app.route("/admin/update-settings", methods=["POST"])
-def update_settings():
-    if not session.get("admin_logged_in"):
+@app.route("/logout")
+def user_logout():
+    session.clear()
+    return redirect(url_for("user_login"))
+
+# --- গেম লজিক ---
+@app.route("/start-game", methods=["POST"])
+def start_game():
+    if "user_logged_in" not in session:
         return jsonify({"status": "unauthorized"}), 401
-    new_edge = float(request.form.get("house_edge", 0.10))
-    update_db_settings(new_edge)
-    return redirect(url_for("admin_dashboard"))
-
-@app.route("/admin/logout")
-def admin_logout():
-    session.pop("admin_logged_in", None)
-    return redirect(url_for("admin_login"))
+        
+    current_settings = get_settings()
+    
+    # ক্র্যাশ পয়েন্ট জেনারেট করা
+    if random.random() < current_settings["house_edge"]:
+        crash_point = 1.00
+    else:
+        e = random.random()
+        crash_point = round(max(1.00, 99 / (100 - e * 100)), 2)
+        
+    return jsonify({"status": "flying", "secret_crash": crash_point})
 
 if __name__ == "__main__":
     app.run(debug=True)
