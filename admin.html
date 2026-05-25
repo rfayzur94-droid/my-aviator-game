@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Casino Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #222; color: #fff; padding: 40px; }
+        .card { background: #333; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Casino Management Admin Panel</h1>
+    <div class="card">
+        <h3>Live Statistics</h3>
+        <p>Total Bets Placed: <strong>{{ stats.total_bets }}</strong></p>
+        <p>Estimated House Margin: <strong>{{ (stats.house_edge * 100)|int }}%</strong></p>
+    </div>
+    <div class="card">
+        <h3>Game Risk Management</h3>
+        <form action="/admin/update-settings" method="post">
+            <label>Adjust House Edge (0.03 = 3% Instant Crash Risk):</label><br><br>
+            <input type="number" step="0.01" min="0.01" max="0.50" name="house_edge" value="{{ stats.house_edge }}">
+            <button type="submit">Update Settings</button>
+        </form>
+    </div>
+</body>
+</html>
