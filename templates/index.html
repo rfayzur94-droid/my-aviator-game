@@ -1,150 +1,487 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Aviator Professional - Live</title>
-    <style>
-        body { background-color: #0f0f12; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; }
-        .header-bar { display: flex; justify-content: space-between; padding: 15px 30px; background: #14151a; border-bottom: 1px solid #272a33; }
-        .balance-box { background: #28a745; padding: 5px 15px; border-radius: 5px; font-weight: bold; }
-        #game-area { width: 90%; max-width: 600px; height: 280px; background-color: #14151a; margin: 20px auto; border-radius: 15px; position: relative; overflow: hidden; border: 2px solid #272a33; }
-        #multiplier { font-size: 4rem; font-weight: bold; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); }
-        button { padding: 15px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 600px; }
-        #bet-btn { background-color: #e91e63; color: white; }
-        #cashout-btn { background-color: #ff9800; color: white; display: none; }
-        .pannel-container { display: flex; justify-content: center; gap: 20px; margin-top: 30px; padding: 20px; }
-        .box { background: #14151a; padding: 20px; border-radius: 10px; border: 1px solid #272a33; width: 45%; max-width: 300px; text-align: left; }
-        input, select { width: 90%; padding: 8px; margin: 8px 0; background: #1c1d24; color: white; border: 1px solid #444; border-radius: 4px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopNest — Your One-Stop Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #f5a623;
+    --bg: #f8f7f4;
+    --white: #ffffff;
+    --gray: #6b7280;
+    --light: #f1f0ed;
+    --border: #e5e4e0;
+    --success: #22c55e;
+    --text: #1a1a2e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+  a { text-decoration: none; color: inherit; }
+
+  /* NAV */
+  nav {
+    background: var(--primary);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: #fff; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a { color: rgba(255,255,255,0.8); font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .btn-cart {
+    background: var(--accent); color: #fff; border: none; padding: 0.5rem 1.25rem;
+    border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 0.4rem; transition: opacity 0.2s;
+  }
+  .btn-cart:hover { opacity: 0.9; }
+  .cart-count {
+    background: var(--accent2); color: var(--primary); border-radius: 50%;
+    width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    padding: 5rem 2rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; text-align: center;
+  }
+  .hero-badge {
+    background: rgba(233,69,96,0.15); border: 1px solid rgba(233,69,96,0.4);
+    color: var(--accent); padding: 0.35rem 1rem; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 500; margin-bottom: 1.5rem; display: inline-block;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 1rem;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: rgba(255,255,255,0.65); font-size: 1.1rem; max-width: 540px; margin-bottom: 2rem; }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    background: var(--accent); color: #fff; padding: 0.8rem 2rem;
+    border-radius: 8px; font-weight: 500; border: none; cursor: pointer;
+    font-size: 1rem; font-family: 'DM Sans', sans-serif; transition: transform 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent; color: #fff; padding: 0.8rem 2rem;
+    border-radius: 8px; font-weight: 500; border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer; font-size: 1rem; font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+  /* CATEGORIES */
+  .section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;
+  }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.75rem; font-weight: 700; }
+  .see-all { color: var(--accent); font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+  .cats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; }
+  .cat-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s;
+  }
+  .cat-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .cat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .cat-name { font-size: 0.85rem; font-weight: 500; }
+
+  /* PRODUCTS */
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
+  .product-card {
+    background: var(--white); border-radius: 12px; border: 1px solid var(--border);
+    overflow: hidden; cursor: pointer; transition: all 0.2s;
+  }
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+  .product-img {
+    width: 100%; aspect-ratio: 1; background: var(--light);
+    display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative;
+  }
+  .product-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 600;
+    padding: 0.2rem 0.5rem; border-radius: 4px;
+  }
+  .product-info { padding: 1rem; }
+  .product-name { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .product-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
+  .product-price { font-weight: 700; font-size: 1.05rem; color: var(--accent); }
+  .product-old-price { text-decoration: line-through; color: var(--gray); font-size: 0.82rem; margin-left: 0.4rem; }
+  .stars { color: var(--accent2); font-size: 0.8rem; }
+  .btn-add {
+    background: var(--primary); color: #fff; border: none; border-radius: 6px;
+    padding: 0.5rem 1rem; font-size: 0.82rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: background 0.2s; width: 100%; margin-top: 0.75rem;
+  }
+  .btn-add:hover { background: var(--accent); }
+
+  /* BANNER */
+  .promo-banner {
+    background: linear-gradient(120deg, #e94560, #f5a623);
+    margin: 0 2rem; border-radius: 16px; padding: 3rem 3rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .promo-text h2 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
+  .promo-text p { color: rgba(255,255,255,0.85); margin-top: 0.4rem; }
+  .promo-emoji { font-size: 5rem; }
+
+  /* FOOTER */
+  footer {
+    background: var(--primary); color: rgba(255,255,255,0.7);
+    padding: 3rem 2rem 1.5rem;
+  }
+  .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto 2rem; }
+  .footer-col h4 { color: #fff; font-family: 'Syne', sans-serif; font-weight: 600; margin-bottom: 1rem; }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 0.5rem; font-size: 0.9rem; cursor: pointer; }
+  .footer-col ul li:hover { color: #fff; }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; text-align: center; font-size: 0.85rem; max-width: 1200px; margin: 0 auto; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 1000; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--white); border-radius: 16px; padding: 2rem;
+    max-width: 480px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: var(--light); border: none; border-radius: 50%;
+    width: 32px; height: 32px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  }
+  .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--gray); }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.65rem 0.9rem; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 0.95rem; font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s; outline: none; background: var(--bg);
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem; }
+  .pay-option {
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem;
+    cursor: pointer; text-align: center; font-size: 0.85rem; transition: all 0.2s;
+  }
+  .pay-option.selected { border-color: var(--accent); background: rgba(233,69,96,0.05); }
+  .cart-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+  .cart-item-img { font-size: 2rem; width: 50px; height: 50px; background: var(--light); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-size: 0.9rem; font-weight: 500; }
+  .cart-item-price { font-size: 0.85rem; color: var(--accent); font-weight: 600; }
+  .cart-total { font-size: 1.1rem; font-weight: 700; text-align: right; margin-top: 1rem; }
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--primary);
+    color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px;
+    font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; z-index: 9999;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .toast.show { opacity: 1; }
+  .search-bar {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; padding: 0.45rem 1rem; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; width: 220px;
+  }
+  .search-bar::placeholder { color: rgba(255,255,255,0.4); }
+</style>
 </head>
 <body>
 
-    <div class="header-bar">
-        <div>Player: <strong>{{ username }}</strong> | <a href="/logout" style="color: #aaa;">Logout</a></div>
-        <div class="balance-box">Account Balance: <span id="user-balance">{{ balance }}</span> TK</div>
-    </div>
-    
-    <div id="game-area">
-        <div id="multiplier">1.00x</div>
-    </div>
+<!-- NAVIGATION -->
+<nav>
+  <div class="logo">Shop<span>Nest</span></div>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Products</a>
+    <a href="#">Deals</a>
+    <a href="#">About</a>
+    <a href="admin.html" style="color: var(--accent2); font-weight: 600;">Admin ↗</a>
+  </div>
+  <div class="nav-actions">
+    <input type="text" class="search-bar" placeholder="Search products..." id="searchInput" oninput="filterProducts()">
+    <button class="btn-cart" onclick="openCart()">
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
 
-    <div style="padding: 0 20px;">
-        <input type="number" id="bet-amount" value="100" min="10" style="max-width: 580px; text-align: center;"><br>
-        <button id="bet-btn" onclick="startGame()">PLACE BET</button>
-        <button id="cashout-btn" onclick="cashOut()">CASH OUT</button>
-    </div>
-    
-    <div id="status" style="margin-top: 15px; font-weight: bold; color: #aaa;">Place a bet. If the plane flies away before Cashout, you lose!</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🔥 Mega Sale — Up to 60% Off</div>
+  <h1>Everything You Need,<br><span>All in One Place</span></h1>
+  <p>Shop thousands of products across all categories with fast delivery across Bangladesh.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+    <button class="btn-outline">View Deals</button>
+  </div>
+</section>
 
-    <div class="pannel-container">
-        <div class="box">
-            <h3>Manual Deposit</h3>
-            <p style="font-size: 0.8rem; color:#aaa;">Send money to: 017XXXXXXXX (Personal)</p>
-            <form action="/transaction" method="POST">
-                <input type="hidden" name="type" value="deposit">
-                <select name="method"><option>bKash</option><option>Nagad</option><option>Rocket</option></select>
-                <input type="text" name="number" placeholder="Your Sender Number" required>
-                <input type="number" name="amount" placeholder="Amount" required>
-                <input type="text" name="txid" placeholder="Transaction ID (TxID)" required>
-                <button type="submit" style="background:#28a745; padding:8px; font-size:1rem;">Submit Deposit</button>
-            </form>
+<!-- CATEGORIES -->
+<div class="section">
+  <div class="section-header">
+    <h2 class="section-title">Browse Categories</h2>
+  </div>
+  <div class="cats-grid" id="categoriesGrid"></div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="section" id="products">
+  <div class="section-header">
+    <h2 class="section-title">Featured Products</h2>
+    <span class="see-all">View All →</span>
+  </div>
+  <div class="products-grid" id="productsGrid"></div>
+</div>
+
+<!-- PROMO BANNER -->
+<div style="max-width:1200px; margin: 0 auto; padding: 0 2rem 4rem;">
+  <div class="promo-banner">
+    <div class="promo-text">
+      <h2>Free Delivery on Orders<br>Over ৳999!</h2>
+      <p>Use code <strong>FREEDEL</strong> at checkout. Limited time offer.</p>
+      <button class="btn-primary" style="margin-top:1rem; background:#fff; color:var(--accent);">Grab the Deal</button>
+    </div>
+    <div class="promo-emoji">🚀</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>ShopNest</h4>
+      <p style="font-size:0.88rem; line-height:1.6;">Bangladesh's favorite general store. Quality products, fast delivery.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li>Home</li><li>Products</li><li>Deals</li><li>Track Order</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Customer Care</h4>
+      <ul>
+        <li>Help Center</li><li>Returns</li><li>Shipping Info</li><li>Contact Us</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li>📞 01XXXXXXXXX</li>
+        <li>📧 support@shopnest.bd</li>
+        <li>📍 Dhaka, Bangladesh</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 ShopNest. All rights reserved. | Payments: bKash · Nagad · Cash on Delivery · Card</p>
+  </div>
+</footer>
+
+<!-- CART MODAL -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCart()">✕</button>
+    <h2>🛒 Your Cart</h2>
+    <div id="cartItems"></div>
+    <div class="cart-total" id="cartTotal"></div>
+    <button class="btn-primary" style="width:100%;margin-top:1rem;" onclick="openCheckout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCheckout()">✕</button>
+    <h2>Checkout</h2>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" placeholder="Your full name">
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" placeholder="01XXXXXXXXX">
+    </div>
+    <div class="form-group">
+      <label>Delivery Address</label>
+      <textarea placeholder="Full address with area, city..." rows="2" style="width:100%;padding:0.65rem 0.9rem;border:1px solid var(--border);border-radius:8px;font-size:0.95rem;font-family:'DM Sans',sans-serif;resize:vertical;background:var(--bg);"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Payment Method</label>
+      <div class="payment-methods">
+        <div class="pay-option selected" onclick="selectPay(this)">📱 bKash</div>
+        <div class="pay-option" onclick="selectPay(this)">💳 Nagad</div>
+        <div class="pay-option" onclick="selectPay(this)">🤝 Cash on Delivery</div>
+        <div class="pay-option" onclick="selectPay(this)">💳 Card</div>
+      </div>
+    </div>
+    <div id="checkoutTotal" style="font-size:1.1rem;font-weight:700;text-align:right;margin:1rem 0;color:var(--accent);"></div>
+    <button class="btn-primary" style="width:100%;" onclick="placeOrder()">Place Order ✓</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const categories = [
+  {icon:'👗',name:'Fashion'},
+  {icon:'📱',name:'Electronics'},
+  {icon:'🏠',name:'Home & Living'},
+  {icon:'💄',name:'Beauty'},
+  {icon:'🎮',name:'Gaming'},
+  {icon:'📚',name:'Books'},
+  {icon:'🍕',name:'Food'},
+  {icon:'⚽',name:'Sports'},
+];
+
+const allProducts = [
+  {id:1,name:'Premium Wireless Headphones',price:2499,old:3999,emoji:'🎧',badge:'Hot',cat:'Electronics',rating:5},
+  {id:2,name:'Smart Watch Pro',price:4999,old:7500,emoji:'⌚',badge:'Sale',cat:'Electronics',rating:5},
+  {id:3,name:'Cotton Casual T-Shirt',price:599,old:899,emoji:'👕',badge:'',cat:'Fashion',rating:4},
+  {id:4,name:'Running Shoes',price:1899,old:2500,emoji:'👟',badge:'New',cat:'Sports',rating:5},
+  {id:5,name:'Coffee Maker Deluxe',price:3299,old:4500,emoji:'☕',badge:'',cat:'Home & Living',rating:4},
+  {id:6,name:'Gaming Mechanical Keyboard',price:2199,old:3200,emoji:'⌨️',badge:'Hot',cat:'Gaming',rating:5},
+  {id:7,name:'Skincare Face Serum',price:899,old:1200,emoji:'✨',badge:'New',cat:'Beauty',rating:4},
+  {id:8,name:'Yoga Mat Premium',price:1299,old:1800,emoji:'🧘',badge:'',cat:'Sports',rating:4},
+];
+
+let cart = JSON.parse(localStorage.getItem('shopnest_cart') || '[]');
+
+function saveCart() { localStorage.setItem('shopnest_cart', JSON.stringify(cart)); }
+
+function renderCategories() {
+  document.getElementById('categoriesGrid').innerHTML = categories.map(c =>
+    `<div class="cat-card" onclick="filterByCat('${c.name}')">
+      <div class="cat-icon">${c.icon}</div>
+      <div class="cat-name">${c.name}</div>
+    </div>`
+  ).join('');
+}
+
+function renderProducts(products) {
+  document.getElementById('productsGrid').innerHTML = products.map(p =>
+    `<div class="product-card">
+      <div class="product-img">
+        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+        ${p.emoji}
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="stars">${'★'.repeat(p.rating)}${'☆'.repeat(5-p.rating)}</div>
+        <div class="product-meta">
+          <div>
+            <span class="product-price">৳${p.price.toLocaleString()}</span>
+            ${p.old ? `<span class="product-old-price">৳${p.old.toLocaleString()}</span>` : ''}
+          </div>
         </div>
+        <button class="btn-add" onclick="addToCart(${p.id})">Add to Cart</button>
+      </div>
+    </div>`
+  ).join('');
+}
 
-        <div class="box">
-            <h3>Manual Withdraw</h3>
-            <form action="/transaction" method="POST">
-                <input type="hidden" name="type" value="withdraw">
-                <select name="method"><option>bKash</option><option>Nagad</option><option>Rocket</option></select>
-                <input type="text" name="number" placeholder="Your Receiver Number" required>
-                <input type="number" name="amount" placeholder="Amount" required>
-                <button type="submit" style="background:#cb2424; padding:8px; font-size:1rem;">Submit Withdrawal</button>
-            </form>
-        </div>
-    </div>
+function filterProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+  renderProducts(filtered);
+}
 
-    <script>
-        let currentMultiplier = 1.00;
-        let crashPoint = 0;
-        let gameInterval;
-        let isFlying = false;
+function filterByCat(cat) {
+  const filtered = allProducts.filter(p => p.cat === cat);
+  renderProducts(filtered.length ? filtered : allProducts);
+  document.getElementById('products').scrollIntoView({behavior:'smooth'});
+}
 
-        async function startGame() {
-            if (isFlying) return;
-            
-            let betAmount = parseFloat(document.getElementById("bet-amount").value);
-            let currentBalance = parseFloat(document.getElementById("user-balance").innerText);
-            
-            if (betAmount > currentBalance) {
-                document.getElementById("status").innerText = "❌ Insufficient Balance!";
-                return;
-            }
+function addToCart(id) {
+  const p = allProducts.find(p => p.id === id);
+  const existing = cart.find(i => i.id === id);
+  if (existing) existing.qty++;
+  else cart.push({...p, qty: 1});
+  saveCart();
+  updateCartCount();
+  showToast('✓ Added to cart!');
+}
 
-            document.getElementById("status").innerText = "Plane is flying... Cash out before it flies away!";
-            document.getElementById("multiplier").innerText = "1.00x";
-            document.getElementById("multiplier").style.color = "white";
-            
-            const response = await fetch('/start-game', { method: 'POST' });
-            const data = await response.json();
-            crashPoint = data.secret_crash;
+function updateCartCount() {
+  document.getElementById('cartCount').textContent = cart.reduce((s,i) => s+i.qty, 0);
+}
 
-            document.getElementById("bet-btn").style.display = "none";
-            document.getElementById("cashout-btn").style.display = "block";
-            isFlying = true;
-            currentMultiplier = 1.00;
+function openCart() {
+  const modal = document.getElementById('cartModal');
+  modal.classList.add('active');
+  const itemsEl = document.getElementById('cartItems');
+  if (!cart.length) {
+    itemsEl.innerHTML = '<p style="color:var(--gray);text-align:center;padding:2rem 0;">Your cart is empty</p>';
+    document.getElementById('cartTotal').textContent = '';
+    return;
+  }
+  itemsEl.innerHTML = cart.map(i =>
+    `<div class="cart-item">
+      <div class="cart-item-img">${i.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${i.name}</div>
+        <div class="cart-item-price">৳${i.price.toLocaleString()} × ${i.qty}</div>
+      </div>
+      <button onclick="removeFromCart(${i.id})" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--gray);">✕</button>
+    </div>`
+  ).join('');
+  const total = cart.reduce((s,i) => s + i.price*i.qty, 0);
+  document.getElementById('cartTotal').textContent = `Total: ৳${total.toLocaleString()}`;
+}
 
-            gameInterval = setInterval(async () => {
-                if (currentMultiplier >= crashPoint) {
-                    clearInterval(gameInterval);
-                    isFlying = false;
-                    document.getElementById("multiplier").innerText = "FLEW AWAY!";
-                    document.getElementById("multiplier").style.color = "#cb2424";
-                    document.getElementById("status").innerText = `💥 Crashed at ${crashPoint}x. You lost ${betAmount} TK!`;
-                    
-                    // ব্যাকএন্ডে লস ডাটা পাঠানো এবং ব্যালেন্স মাইনাস করা
-                    await fetch('/game-result', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ action: 'loss', bet_amount: betAmount })
-                    });
-                    
-                    // স্ক্রিনে ব্যালেন্স আপডেট
-                    document.getElementById("user-balance").innerText = (currentBalance - betAmount).toFixed(2);
-                    resetButtons();
-                } else {
-                    currentMultiplier += 0.01;
-                    document.getElementById("multiplier").innerText = currentMultiplier.toFixed(2) + "x";
-                }
-            }, 50);
-        }
+function closeCart() { document.getElementById('cartModal').classList.remove('active'); }
 
-        async function cashOut() {
-            if (!isFlying) return;
-            clearInterval(gameInterval);
-            isFlying = false;
-            
-            let betAmount = parseFloat(document.getElementById("bet-amount").value);
-            let currentBalance = parseFloat(document.getElementById("user-balance").innerText);
-            let winnings = betAmount * currentMultiplier;
-            let profit = winnings - betAmount;
-            
-            document.getElementById("multiplier").style.color = "#28a745";
-            document.getElementById("status").innerText = `🎉 Successfully Cashed Out! Profit: +${profit.toFixed(2)} TK`;
-            
-            // ব্যাকএন্ডে উইন ডাটা পাঠানো এবং ব্যালেন্স প্লাস করা
-            await fetch('/game-result', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'cashout', bet_amount: betAmount, rate: currentMultiplier })
-            });
-            
-            document.getElementById("user-balance").innerText = (currentBalance + profit).toFixed(2);
-            resetButtons();
-        }
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  saveCart(); updateCartCount(); openCart();
+}
 
-        function resetButtons() {
-            document.getElementById("bet-btn").style.display = "block";
-            document.getElementById("cashout-btn").style.display = "none";
-        }
-    </script>
+function openCheckout() {
+  closeCart();
+  const total = cart.reduce((s,i) => s + i.price*i.qty, 0);
+  document.getElementById('checkoutTotal').textContent = `Total: ৳${total.toLocaleString()}`;
+  document.getElementById('checkoutModal').classList.add('active');
+}
+
+function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+function selectPay(el) {
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function placeOrder() {
+  cart = []; saveCart(); updateCartCount();
+  closeCheckout();
+  showToast('🎉 Order placed successfully!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Init
+renderCategories();
+renderProducts(allProducts);
+updateCartCount();
+</script>
 </body>
 </html>
