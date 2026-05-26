@@ -1,60 +1,881 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard - Live Requests</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #111217; color: #fff; padding: 30px; }
-        .card { background: #1c1d24; padding: 20px; border-radius: 10px; border: 1px solid #2d3039; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border: 1px solid #2d3039; text-align: left; }
-        th { background-color: #14151a; color: #e91e63; }
-        tr:nth-child(even) { background-color: #16171e; }
-        .badge { padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; background: #ff9800; color: black; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopNest — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #f5a623;
+    --bg: #f3f4f6;
+    --white: #ffffff;
+    --gray: #6b7280;
+    --light: #f9fafb;
+    --border: #e5e7eb;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --text: #111827;
+    --sidebar-w: 240px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w); background: var(--primary); min-height: 100vh;
+    position: fixed; top: 0; left: 0; z-index: 50; display: flex; flex-direction: column;
+  }
+  .sidebar-logo {
+    padding: 1.5rem; font-family: 'Syne', sans-serif; font-size: 1.3rem;
+    font-weight: 800; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-logo small { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .sidebar-nav { padding: 1rem 0; flex: 1; }
+  .nav-section-label {
+    padding: 0.75rem 1.25rem 0.35rem;
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.35); text-transform: uppercase;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.7rem 1.25rem; cursor: pointer; color: rgba(255,255,255,0.65);
+    font-size: 0.9rem; transition: all 0.15s; border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-item.active { background: rgba(233,69,96,0.12); color: var(--accent); border-left-color: var(--accent); }
+  .nav-item .icon { font-size: 1.1rem; width: 22px; text-align: center; }
+  .sidebar-footer {
+    padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.82rem; color: rgba(255,255,255,0.4);
+  }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  .topbar {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 0 2rem; height: 60px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 40;
+  }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .topbar-right { display: flex; align-items: center; gap: 1rem; }
+  .admin-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+  }
+  .back-link { font-size: 0.85rem; color: var(--gray); cursor: pointer; }
+  .back-link:hover { color: var(--accent); }
+
+  .content { padding: 2rem; flex: 1; }
+
+  /* PAGE VISIBILITY */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--white); border-radius: 12px; padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border); display: flex; align-items: center; gap: 1rem;
+  }
+  .stat-icon {
+    width: 48px; height: 48px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;
+  }
+  .stat-info .label { font-size: 0.8rem; color: var(--gray); margin-bottom: 0.2rem; }
+  .stat-info .value { font-size: 1.6rem; font-weight: 700; font-family: 'Syne', sans-serif; }
+  .stat-info .change { font-size: 0.78rem; margin-top: 0.15rem; }
+  .change.up { color: var(--success); }
+  .change.down { color: var(--danger); }
+
+  /* TABLE */
+  .card {
+    background: var(--white); border-radius: 12px; border: 1px solid var(--border);
+    overflow: hidden; margin-bottom: 1.5rem;
+  }
+  .card-header {
+    padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-header h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--light); padding: 0.75rem 1rem; text-align: left; font-size: 0.78rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 0.85rem 1rem; font-size: 0.88rem; border-top: 1px solid var(--border); }
+  tr:hover td { background: var(--light); }
+  .badge {
+    display: inline-block; padding: 0.25rem 0.65rem; border-radius: 50px;
+    font-size: 0.73rem; font-weight: 600;
+  }
+  .badge-success { background: #d1fae5; color: #065f46; }
+  .badge-warning { background: #fef3c7; color: #92400e; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-info { background: #dbeafe; color: #1e40af; }
+
+  /* BUTTONS */
+  .btn { padding: 0.5rem 1.1rem; border-radius: 7px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; transition: all 0.15s; }
+  .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary { background: var(--light); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: #fee2e2; color: var(--danger); }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-success { background: #d1fae5; color: #065f46; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-group label { font-size: 0.82rem; font-weight: 500; color: var(--gray); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 7px;
+    font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none; background: var(--bg);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .card-body { padding: 1.5rem; }
+
+  /* CHART BAR */
+  .chart-bars { display: flex; align-items: flex-end; gap: 0.6rem; height: 120px; padding: 0 0.5rem; }
+  .bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; }
+  .bar { border-radius: 4px 4px 0 0; width: 100%; transition: height 0.4s; }
+  .bar-label { font-size: 0.68rem; color: var(--gray); }
+
+  /* RESPONSIVE CONTROLS */
+  .page-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
+  .search-input {
+    padding: 0.5rem 0.85rem; border: 1px solid var(--border); border-radius: 7px;
+    font-size: 0.88rem; font-family: 'DM Sans', sans-serif; outline: none; width: 220px;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--white); border-radius: 14px; padding: 1.75rem; max-width: 520px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: var(--light); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 1.5rem; }
+  .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .product-emoji-picker { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .emoji-opt { width: 38px; height: 38px; border: 1.5px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
+  .emoji-opt.selected { border-color: var(--accent); background: rgba(233,69,96,0.07); }
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--primary); color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 0.88rem; opacity: 0; transition: opacity 0.3s; z-index: 9999; }
+  .toast.show { opacity: 1; }
+</style>
 </head>
 <body>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Aviator System Dashboard</h1>
-        <a href="/logout" style="color: #aaa; text-decoration: none; font-weight: bold;">Logout</a>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    Shop<span>Nest</span>
+    <small>Admin Dashboard</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <span class="icon">📊</span> Dashboard
     </div>
-    
-    <div class="card">
-        <h3>Simulated Player Transactions (Manual Mode)</h3>
-        <p style="color: #888; font-size: 0.9rem;">The requests submitted by users via Deposit/Withdrawal forms appear here in real-time:</p>
-        
+    <div class="nav-item" onclick="showPage('products', this)">
+      <span class="icon">📦</span> Products
+    </div>
+    <div class="nav-item" onclick="showPage('orders', this)">
+      <span class="icon">🛒</span> Orders
+    </div>
+    <div class="nav-item" onclick="showPage('customers', this)">
+      <span class="icon">👥</span> Customers
+    </div>
+    <div class="nav-section-label">Store</div>
+    <div class="nav-item" onclick="showPage('categories', this)">
+      <span class="icon">🏷️</span> Categories
+    </div>
+    <div class="nav-item" onclick="showPage('coupons', this)">
+      <span class="icon">🎟️</span> Coupons
+    </div>
+    <div class="nav-item" onclick="showPage('settings', this)">
+      <span class="icon">⚙️</span> Settings
+    </div>
+    <div class="nav-section-label">Reports</div>
+    <div class="nav-item" onclick="showPage('reports', this)">
+      <span class="icon">📈</span> Analytics
+    </div>
+  </nav>
+  <div class="sidebar-footer">v1.0 · ShopNest Admin</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <a href="index.html" class="back-link">← View Store</a>
+      <div style="font-size:0.85rem; color:var(--gray);">Admin</div>
+      <div class="admin-avatar">AD</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7;">💰</div>
+          <div class="stat-info">
+            <div class="label">Total Revenue</div>
+            <div class="value" id="statRevenue">৳0</div>
+            <div class="change up">↑ 12% this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dbeafe;">🛒</div>
+          <div class="stat-info">
+            <div class="label">Total Orders</div>
+            <div class="value" id="statOrders">0</div>
+            <div class="change up">↑ 8% this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#d1fae5;">👥</div>
+          <div class="stat-info">
+            <div class="label">Customers</div>
+            <div class="value" id="statCustomers">0</div>
+            <div class="change up">↑ 5% this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fce7f3;">📦</div>
+          <div class="stat-info">
+            <div class="label">Products</div>
+            <div class="value" id="statProducts">0</div>
+            <div class="change">Active listings</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><h3>Revenue (Last 7 days)</h3></div>
+          <div class="card-body">
+            <div class="chart-bars" id="revenueChart"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Recent Orders</h3></div>
+          <table>
+            <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody id="recentOrders"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><h3>Top Products</h3></div>
+          <table>
+            <thead><tr><th>Product</th><th>Price</th><th>Sales</th></tr></thead>
+            <tbody id="topProductsTable"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Payment Breakdown</h3></div>
+          <div class="card-body" id="paymentBreakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS PAGE -->
+    <div class="page" id="page-products">
+      <div class="page-controls">
+        <input type="text" class="search-input" placeholder="Search products..." oninput="filterAdminProducts(this.value)">
+        <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
+      </div>
+      <div class="card">
         <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Player Username</th>
-                    <th>Type</th>
-                    <th>Method</th>
-                    <th>Number</th>
-                    <th>Amount (TK)</th>
-                    <th>Submitted TxID</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in list %}
-                <tr>
-                    <td>{{ row[0] }}</td>
-                    <td><strong>{{ row[1] }}</strong></td>
-                    <td style="color: {% if row[2] == 'deposit' %}#28a745{% else %}#cb2424{% endif %}; font-weight:bold;">{{ row[2].upper() }}</td>
-                    <td>{{ row[3] }}</td>
-                    <td>{{ row[4] }}</td>
-                    <td><strong>{{ row[5] }}</strong></td>
-                    <td style="font-family: monospace; color: #00bcd4;">{{ row[6] }}</td>
-                    <td><span class="badge">{{ row[7] }}</span></td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="8" style="text-align: center; color: #666;">No transaction requests submitted yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="adminProductsTable"></tbody>
         </table>
+      </div>
     </div>
+
+    <!-- ORDERS PAGE -->
+    <div class="page" id="page-orders">
+      <div class="page-controls">
+        <input type="text" class="search-input" placeholder="Search orders...">
+        <div style="display:flex;gap:0.5rem;">
+          <select class="search-input" style="width:auto;" onchange="filterOrders(this.value)">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS PAGE -->
+    <div class="page" id="page-customers">
+      <div class="page-controls">
+        <input type="text" class="search-input" placeholder="Search customers...">
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Name</th><th>Phone</th><th>Area</th><th>Orders</th><th>Total Spent</th><th>Joined</th></tr></thead>
+          <tbody id="customersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CATEGORIES PAGE -->
+    <div class="page" id="page-categories">
+      <div class="page-controls">
+        <h3 style="font-family:'Syne',sans-serif;">Manage Categories</h3>
+        <button class="btn btn-primary" onclick="openCategoryModal()">+ Add Category</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Icon</th><th>Name</th><th>Products</th><th>Actions</th></tr></thead>
+          <tbody id="categoriesTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COUPONS PAGE -->
+    <div class="page" id="page-coupons">
+      <div class="page-controls">
+        <h3 style="font-family:'Syne',sans-serif;">Discount Coupons</h3>
+        <button class="btn btn-primary" onclick="openCouponModal()">+ New Coupon</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Code</th><th>Discount</th><th>Type</th><th>Uses</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="couponsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div style="max-width:640px;">
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-header"><h3>Store Settings</h3></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group full">
+                <label>Store Name</label>
+                <input type="text" value="ShopNest">
+              </div>
+              <div class="form-group">
+                <label>Contact Email</label>
+                <input type="email" value="support@shopnest.bd">
+              </div>
+              <div class="form-group">
+                <label>Contact Phone</label>
+                <input type="tel" value="01XXXXXXXXX">
+              </div>
+              <div class="form-group full">
+                <label>Address</label>
+                <input type="text" value="Dhaka, Bangladesh">
+              </div>
+              <div class="form-group">
+                <label>Currency</label>
+                <select><option selected>BDT (৳)</option><option>USD ($)</option></select>
+              </div>
+              <div class="form-group">
+                <label>Free Delivery Above (৳)</label>
+                <input type="number" value="999">
+              </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1.25rem;" onclick="showToast('✓ Settings saved!')">Save Changes</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Payment Methods</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:0.85rem;">
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" checked> <span>📱 bKash</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" checked> <span>💳 Nagad</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" checked> <span>🤝 Cash on Delivery</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" checked> <span>💳 Card Payment</span>
+              </label>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1.25rem;" onclick="showToast('✓ Payment settings saved!')">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS PAGE -->
+    <div class="page" id="page-reports">
+      <div class="stats-grid" style="margin-bottom:1.5rem;">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dbeafe;">📦</div>
+          <div class="stat-info"><div class="label">Pending Orders</div><div class="value" id="rPending">0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#d1fae5;">✅</div>
+          <div class="stat-info"><div class="label">Delivered</div><div class="value" id="rDelivered">0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7;">🚚</div>
+          <div class="stat-info"><div class="label">Shipped</div><div class="value" id="rShipped">0</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fce7f3;">↩️</div>
+          <div class="stat-info"><div class="label">Returns</div><div class="value">0</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Sales by Category</h3></div>
+        <div class="card-body" id="catSalesChart" style="display:flex;align-items:flex-end;gap:1rem;height:150px;padding:0.5rem;"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+    <h3 id="productModalTitle">Add Product</h3>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Product Name</label>
+        <input type="text" id="pm_name" placeholder="e.g. Premium Headphones">
+      </div>
+      <div class="form-group">
+        <label>Price (৳)</label>
+        <input type="number" id="pm_price" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Old Price (৳)</label>
+        <input type="number" id="pm_old" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="pm_cat">
+          <option>Electronics</option><option>Fashion</option><option>Home & Living</option>
+          <option>Beauty</option><option>Gaming</option><option>Books</option><option>Food</option><option>Sports</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Stock Quantity</label>
+        <input type="number" id="pm_stock" placeholder="0">
+      </div>
+      <div class="form-group full">
+        <label>Emoji Icon</label>
+        <div class="product-emoji-picker" id="emojiPicker">
+          🎧 ⌚ 👕 👟 ☕ ⌨️ ✨ 🧘 📱 💻 🎮 📚 🍕 🏠 💄 ⚽
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Badge</label>
+        <select id="pm_badge">
+          <option value="">None</option><option>Hot</option><option>New</option><option>Sale</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="pm_status"><option>Active</option><option>Inactive</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('categoryModal')">✕</button>
+    <h3>Add Category</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Icon (emoji)</label><input type="text" id="cm_icon" placeholder="🛍️" maxlength="2"></div>
+      <div class="form-group"><label>Category Name</label><input type="text" id="cm_name" placeholder="Category name"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Add Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- COUPON MODAL -->
+<div class="modal-overlay" id="couponModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('couponModal')">✕</button>
+    <h3>Create Coupon</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Coupon Code</label><input type="text" id="cp_code" placeholder="e.g. SAVE20"></div>
+      <div class="form-group"><label>Discount</label><input type="number" id="cp_disc" placeholder="20"></div>
+      <div class="form-group"><label>Type</label><select id="cp_type"><option>Percentage (%)</option><option>Fixed (৳)</option></select></div>
+      <div class="form-group"><label>Expires</label><input type="date" id="cp_exp"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('couponModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCoupon()">Create Coupon</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// DATA
+let products = JSON.parse(localStorage.getItem('sn_products') || 'null') || [
+  {id:1,name:'Premium Wireless Headphones',price:2499,old:3999,emoji:'🎧',badge:'Hot',cat:'Electronics',stock:45,status:'Active'},
+  {id:2,name:'Smart Watch Pro',price:4999,old:7500,emoji:'⌚',badge:'Sale',cat:'Electronics',stock:23,status:'Active'},
+  {id:3,name:'Cotton Casual T-Shirt',price:599,old:899,emoji:'👕',badge:'',cat:'Fashion',stock:120,status:'Active'},
+  {id:4,name:'Running Shoes',price:1899,old:2500,emoji:'👟',badge:'New',cat:'Sports',stock:38,status:'Active'},
+  {id:5,name:'Coffee Maker Deluxe',price:3299,old:4500,emoji:'☕',badge:'',cat:'Home & Living',stock:15,status:'Active'},
+  {id:6,name:'Gaming Mechanical Keyboard',price:2199,old:3200,emoji:'⌨️',badge:'Hot',cat:'Gaming',stock:29,status:'Active'},
+  {id:7,name:'Skincare Face Serum',price:899,old:1200,emoji:'✨',badge:'New',cat:'Beauty',stock:65,status:'Active'},
+  {id:8,name:'Yoga Mat Premium',price:1299,old:1800,emoji:'🧘',badge:'',cat:'Sports',stock:42,status:'Active'},
+];
+
+let orders = JSON.parse(localStorage.getItem('sn_orders') || 'null') || [
+  {id:'#ORD-1001',customer:'Rahim Uddin',items:2,total:4998,payment:'bKash',date:'2025-01-15',status:'Delivered'},
+  {id:'#ORD-1002',customer:'Fatema Khatun',items:1,total:2499,payment:'Nagad',date:'2025-01-16',status:'Shipped'},
+  {id:'#ORD-1003',customer:'Karim Ahmed',items:3,total:7897,payment:'Cash on Delivery',date:'2025-01-17',status:'Processing'},
+  {id:'#ORD-1004',customer:'Sumaiya Islam',items:1,total:899,payment:'Card',date:'2025-01-17',status:'Pending'},
+  {id:'#ORD-1005',customer:'Arif Hossain',items:2,total:5498,payment:'bKash',date:'2025-01-18',status:'Delivered'},
+  {id:'#ORD-1006',customer:'Nasrin Begum',items:1,total:1899,payment:'Nagad',date:'2025-01-18',status:'Pending'},
+];
+
+let customers = [
+  {name:'Rahim Uddin',phone:'01711234567',area:'Mirpur, Dhaka',orders:5,spent:12490,joined:'2024-09-10'},
+  {name:'Fatema Khatun',phone:'01811234568',area:'Gulshan, Dhaka',orders:3,spent:8297,joined:'2024-10-02'},
+  {name:'Karim Ahmed',phone:'01911234569',area:'Dhanmondi, Dhaka',orders:7,spent:21894,joined:'2024-08-22'},
+  {name:'Sumaiya Islam',phone:'01611234570',area:'Uttara, Dhaka',orders:2,spent:3199,joined:'2024-11-15'},
+  {name:'Arif Hossain',phone:'01511234571',area:'Motijheel, Dhaka',orders:4,spent:9997,joined:'2024-12-01'},
+];
+
+let adminCategories = [
+  {icon:'👗',name:'Fashion',count:1},
+  {icon:'📱',name:'Electronics',count:2},
+  {icon:'🏠',name:'Home & Living',count:1},
+  {icon:'💄',name:'Beauty',count:1},
+  {icon:'🎮',name:'Gaming',count:1},
+  {icon:'📚',name:'Books',count:0},
+  {icon:'🍕',name:'Food',count:0},
+  {icon:'⚽',name:'Sports',count:2},
+];
+
+let coupons = [
+  {code:'SAVE20',discount:20,type:'Percentage (%)',uses:45,expires:'2025-03-31',status:'Active'},
+  {code:'FLAT100',discount:100,type:'Fixed (৳)',uses:12,expires:'2025-02-28',status:'Active'},
+  {code:'WELCOME10',discount:10,type:'Percentage (%)',uses:89,expires:'2025-01-31',status:'Expired'},
+];
+
+let editingProductId = null;
+let selectedEmoji = '🎧';
+
+function save() {
+  localStorage.setItem('sn_products', JSON.stringify(products));
+  localStorage.setItem('sn_orders', JSON.stringify(orders));
+}
+
+const statusBadge = s => {
+  const map = {Delivered:'badge-success',Shipped:'badge-info',Processing:'badge-warning',Pending:'badge-danger',Active:'badge-success',Inactive:'badge-danger',Expired:'badge-danger'};
+  return `<span class="badge ${map[s]||'badge-info'}">${s}</span>`;
+};
+
+// DASHBOARD
+function loadDashboard() {
+  const totalRev = orders.reduce((s,o) => s+o.total, 0);
+  document.getElementById('statRevenue').textContent = '৳'+totalRev.toLocaleString();
+  document.getElementById('statOrders').textContent = orders.length;
+  document.getElementById('statCustomers').textContent = customers.length;
+  document.getElementById('statProducts').textContent = products.length;
+
+  // Mini bar chart
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals = [12400, 8200, 15600, 9800, 18200, 22400, 16800];
+  const max = Math.max(...vals);
+  document.getElementById('revenueChart').innerHTML = days.map((d,i) =>
+    `<div class="bar-wrap">
+      <div class="bar" style="height:${Math.round(vals[i]/max*100)}%;background:${i===5?'var(--accent)':'var(--primary)'};opacity:${i===5?1:0.65}"></div>
+      <div class="bar-label">${d}</div>
+    </div>`
+  ).join('');
+
+  // Recent orders
+  document.getElementById('recentOrders').innerHTML = orders.slice(0,5).map(o =>
+    `<tr><td style="color:var(--accent);font-weight:600;">${o.id}</td><td>${o.customer}</td><td>৳${o.total.toLocaleString()}</td><td>${statusBadge(o.status)}</td></tr>`
+  ).join('');
+
+  // Top products
+  document.getElementById('topProductsTable').innerHTML = products.slice(0,5).map(p =>
+    `<tr><td>${p.emoji} ${p.name}</td><td>৳${p.price.toLocaleString()}</td><td>${Math.floor(Math.random()*50+10)}</td></tr>`
+  ).join('');
+
+  // Payment breakdown
+  const pm = {'bKash':0,'Nagad':0,'Cash on Delivery':0,'Card':0};
+  orders.forEach(o => { if(pm[o.payment]!==undefined) pm[o.payment]++; });
+  document.getElementById('paymentBreakdown').innerHTML = Object.entries(pm).map(([k,v]) =>
+    `<div style="margin-bottom:0.75rem;">
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.3rem;">
+        <span>${k}</span><span style="font-weight:600;">${v} orders</span>
+      </div>
+      <div style="background:var(--border);border-radius:50px;height:6px;">
+        <div style="background:var(--accent);height:6px;border-radius:50px;width:${Math.round(v/orders.length*100)}%;"></div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// PRODUCTS
+function renderProducts(list) {
+  document.getElementById('adminProductsTable').innerHTML = list.map(p =>
+    `<tr>
+      <td>${p.emoji} <strong>${p.name}</strong></td>
+      <td><span class="badge badge-info">${p.cat}</span></td>
+      <td>৳${p.price.toLocaleString()}</td>
+      <td>${p.stock}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-secondary" onclick="editProduct(${p.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+      </td>
+    </tr>`
+  ).join('');
+}
+
+function filterAdminProducts(q) {
+  renderProducts(products.filter(p => p.name.toLowerCase().includes(q.toLowerCase())));
+}
+
+function openProductModal(id) {
+  editingProductId = null;
+  document.getElementById('productModalTitle').textContent = 'Add Product';
+  document.getElementById('pm_name').value='';
+  document.getElementById('pm_price').value='';
+  document.getElementById('pm_old').value='';
+  document.getElementById('pm_stock').value='';
+  initEmojiPicker();
+  document.getElementById('productModal').classList.add('active');
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  editingProductId = id;
+  document.getElementById('productModalTitle').textContent = 'Edit Product';
+  document.getElementById('pm_name').value = p.name;
+  document.getElementById('pm_price').value = p.price;
+  document.getElementById('pm_old').value = p.old;
+  document.getElementById('pm_stock').value = p.stock;
+  document.getElementById('pm_cat').value = p.cat;
+  document.getElementById('pm_badge').value = p.badge;
+  document.getElementById('pm_status').value = p.status;
+  selectedEmoji = p.emoji;
+  initEmojiPicker();
+  document.getElementById('productModal').classList.add('active');
+}
+
+function initEmojiPicker() {
+  const emojis = ['🎧','⌚','👕','👟','☕','⌨️','✨','🧘','📱','💻','🎮','📚','🍕','🏠','💄','⚽'];
+  document.getElementById('emojiPicker').innerHTML = emojis.map(e =>
+    `<div class="emoji-opt${e===selectedEmoji?' selected':''}" onclick="selectEmoji(this,'${e}')">${e}</div>`
+  ).join('');
+}
+
+function selectEmoji(el, e) {
+  document.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEmoji = e;
+}
+
+function saveProduct() {
+  const name = document.getElementById('pm_name').value.trim();
+  if (!name) { showToast('⚠️ Product name required'); return; }
+  if (editingProductId) {
+    const p = products.find(x => x.id === editingProductId);
+    p.name=name; p.price=+document.getElementById('pm_price').value;
+    p.old=+document.getElementById('pm_old').value; p.stock=+document.getElementById('pm_stock').value;
+    p.cat=document.getElementById('pm_cat').value; p.badge=document.getElementById('pm_badge').value;
+    p.status=document.getElementById('pm_status').value; p.emoji=selectedEmoji;
+  } else {
+    products.push({
+      id: Date.now(), name, price:+document.getElementById('pm_price').value,
+      old:+document.getElementById('pm_old').value, emoji:selectedEmoji,
+      badge:document.getElementById('pm_badge').value, cat:document.getElementById('pm_cat').value,
+      stock:+document.getElementById('pm_stock').value, status:document.getElementById('pm_status').value
+    });
+  }
+  save(); renderProducts(products); closeModal('productModal');
+  showToast(editingProductId ? '✓ Product updated!' : '✓ Product added!');
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  products = products.filter(p => p.id !== id);
+  save(); renderProducts(products); showToast('✓ Product deleted');
+}
+
+// ORDERS
+function renderOrders(list) {
+  document.getElementById('ordersTable').innerHTML = list.map(o =>
+    `<tr>
+      <td style="color:var(--accent);font-weight:600;">${o.id}</td>
+      <td>${o.customer}</td>
+      <td>${o.items}</td>
+      <td>৳${o.total.toLocaleString()}</td>
+      <td>${o.payment}</td>
+      <td>${o.date}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>
+        <select class="search-input" style="width:auto;padding:0.25rem 0.5rem;font-size:0.8rem;" onchange="updateOrderStatus('${o.id}',this.value)">
+          <option ${o.status==='Pending'?'selected':''}>Pending</option>
+          <option ${o.status==='Processing'?'selected':''}>Processing</option>
+          <option ${o.status==='Shipped'?'selected':''}>Shipped</option>
+          <option ${o.status==='Delivered'?'selected':''}>Delivered</option>
+        </select>
+      </td>
+    </tr>`
+  ).join('');
+}
+
+function filterOrders(status) {
+  renderOrders(status ? orders.filter(o => o.status===status) : orders);
+}
+
+function updateOrderStatus(id, status) {
+  const o = orders.find(x => x.id===id);
+  if(o) { o.status=status; save(); showToast('✓ Order status updated'); }
+}
+
+// CUSTOMERS
+function renderCustomers() {
+  document.getElementById('customersTable').innerHTML = customers.map(c =>
+    `<tr>
+      <td><strong>${c.name}</strong></td>
+      <td>${c.phone}</td>
+      <td>${c.area}</td>
+      <td>${c.orders}</td>
+      <td>৳${c.spent.toLocaleString()}</td>
+      <td>${c.joined}</td>
+    </tr>`
+  ).join('');
+}
+
+// CATEGORIES
+function renderCategories() {
+  document.getElementById('categoriesTable').innerHTML = adminCategories.map((c,i) =>
+    `<tr>
+      <td style="font-size:1.4rem;">${c.icon}</td>
+      <td><strong>${c.name}</strong></td>
+      <td>${c.count}</td>
+      <td style="display:flex;gap:0.4rem;">
+        <button class="btn btn-sm btn-danger" onclick="deleteCategory(${i})">Delete</button>
+      </td>
+    </tr>`
+  ).join('');
+}
+
+function openCategoryModal() { document.getElementById('categoryModal').classList.add('active'); }
+function saveCategory() {
+  const icon = document.getElementById('cm_icon').value.trim() || '🏷️';
+  const name = document.getElementById('cm_name').value.trim();
+  if(!name) { showToast('⚠️ Name required'); return; }
+  adminCategories.push({icon,name,count:0});
+  renderCategories(); closeModal('categoryModal');
+  showToast('✓ Category added!');
+}
+function deleteCategory(i) {
+  adminCategories.splice(i,1); renderCategories(); showToast('✓ Deleted');
+}
+
+// COUPONS
+function renderCoupons() {
+  document.getElementById('couponsTable').innerHTML = coupons.map((c,i) =>
+    `<tr>
+      <td style="font-weight:700;font-family:'Syne',sans-serif;">${c.code}</td>
+      <td>${c.discount}${c.type.includes('%')?'%':'৳'}</td>
+      <td>${c.type}</td>
+      <td>${c.uses}</td>
+      <td>${c.expires}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteCoupon(${i})">Delete</button></td>
+    </tr>`
+  ).join('');
+}
+function openCouponModal() { document.getElementById('couponModal').classList.add('active'); }
+function saveCoupon() {
+  const code = document.getElementById('cp_code').value.trim().toUpperCase();
+  if(!code) { showToast('⚠️ Code required'); return; }
+  coupons.unshift({code,discount:+document.getElementById('cp_disc').value,type:document.getElementById('cp_type').value,uses:0,expires:document.getElementById('cp_exp').value||'N/A',status:'Active'});
+  renderCoupons(); closeModal('couponModal'); showToast('✓ Coupon created!');
+}
+function deleteCoupon(i) { coupons.splice(i,1); renderCoupons(); showToast('✓ Deleted'); }
+
+// ANALYTICS
+function loadReports() {
+  document.getElementById('rPending').textContent = orders.filter(o=>o.status==='Pending').length;
+  document.getElementById('rDelivered').textContent = orders.filter(o=>o.status==='Delivered').length;
+  document.getElementById('rShipped').textContent = orders.filter(o=>o.status==='Shipped').length;
+  const catData = {};
+  products.forEach(p => { catData[p.cat]=(catData[p.cat]||0)+1; });
+  const entries = Object.entries(catData);
+  const max = Math.max(...entries.map(e=>e[1]));
+  document.getElementById('catSalesChart').innerHTML = entries.map(([k,v]) =>
+    `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.4rem;">
+      <div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:${Math.round(v/max*100)}%;opacity:0.8;"></div>
+      <div style="font-size:0.7rem;color:var(--gray);text-align:center;">${k.split(' ')[0]}</div>
+    </div>`
+  ).join('');
+}
+
+// NAVIGATION
+const titles = {dashboard:'Dashboard',products:'Products',orders:'Orders',customers:'Customers',categories:'Categories',coupons:'Coupons',settings:'Settings',reports:'Analytics'};
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = titles[name] || name;
+  if(name==='dashboard') loadDashboard();
+  if(name==='products') renderProducts(products);
+  if(name==='orders') renderOrders(orders);
+  if(name==='customers') renderCustomers();
+  if(name==='categories') renderCategories();
+  if(name==='coupons') renderCoupons();
+  if(name==='reports') loadReports();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// INIT
+loadDashboard();
+</script>
 </body>
 </html>
